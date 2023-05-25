@@ -1,6 +1,5 @@
 package com.example.myapplication
 
-import com.yandex.mapkit.geometry.Point
 import java.time.LocalDate
 
 data class User(
@@ -12,4 +11,8 @@ data class User(
     val lastLongitude: Double = Double.NaN,
     val lastLatitude: Double = Double.NaN,
     val lastLocationUpdate: LocalDate = LocalDate.now(),
-)
+) {
+    override fun toString(): String {
+        return "$phoneNumber $lastLatitude-$lastLatitude"
+    }
+}

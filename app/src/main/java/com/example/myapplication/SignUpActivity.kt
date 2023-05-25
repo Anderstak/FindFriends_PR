@@ -28,8 +28,8 @@ import de.hdodenhof.circleimageview.CircleImageView
 import java.util.concurrent.TimeUnit
 
 class SignUpActivity : AppCompatActivity() {
-
-//все перменные, которые отображаются на пользовательском интерфейсе
+    
+    //все перменные, которые отображаются на пользовательском интерфейсе
     lateinit var backBtn: ImageButton
     lateinit var imageUser: CircleImageView
     lateinit var dobInput: DatePicker
@@ -38,96 +38,104 @@ class SignUpActivity : AppCompatActivity() {
     lateinit var signUpBtn: LinearLayout
     var dobOfUser = ""
     private var verificationId = ""//надо было подлючить SSH ключ
-
+    
     lateinit var mAuth: FirebaseAuth //отвечает за firebase аунтификацию
-
+    
     private var uriImg: Uri? = null //путь к картинке
-
+    
     private val selectImage = registerForActivityResult(ActivityResultContracts.GetContent()) {
         //отвечает за выбор картинки из папки выбор картинки
-
+        
         uriImg = it
         imageUser.setImageURI(uriImg) //устанавливаем в юзера нашу картинку(передаем)
     }
-
+    
     lateinit var builder: AlertDialog //Вызываем диалогове окно
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_up)
-
+        
         init()
-
+        
         imageUser.setOnClickListener { //При нажатии человек может выбрать картинку
             selectImage.launch("image/*")
         }
-
+        
         signUpBtn.setOnClickListener {
             validData()
         }
-
+        
         backBtn.setOnClickListener { //Переход из одного окна в другое
             val intent = Intent(this, AuthActivity::class.java)
             startActivity(intent)
             finish()
         }
     }
-
-
+    
+    
     private fun validData() { //проверяем корректность данных(проверка полей)
         if (TextUtils.isEmpty(nicknameInput.text.toString())) {
             nicknameInput.setError("Enter nickname")
-        }else if (!Patterns.PHONE.matcher(phoneInput.text.toString()).matches()) {
+        } else if (!Patterns.PHONE.matcher(phoneInput.text.toString()).matches()) {
             phoneInput.setError("Enter phone number")
-        }else if(uriImg == null) {
+        } else if (uriImg == null) {
             Toast.makeText(this, "Choose profile image", Toast.LENGTH_SHORT).show()
-        }else {
+        } else {
             showOTPDialog()//отвечает за показ диалогового окна
         }
     }
-
+    
     private fun showOTPDialog() { //Создает диалоговое окно
-
-
+        
+        
         val view = layoutInflater.inflate(R.layout.otp_dialog, null)
         val otpInput: EditText = view.findViewById(R.id.otp_input)
         val closeBtn: AppCompatButton = view.findViewById(R.id.close_dialog)
         val enterCode: AppCompatButton = view.findViewById(R.id.enter_code)
         builder.setView(view)
-
-
-        val mCallBack = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() { //отвечает за отправку смс
+        
+        
+        val mCallBack = object :
+            PhoneAuthProvider.OnVerificationStateChangedCallbacks() { //отвечает за отправку смс
             // при вызове нашего диалога(до его создание) отпрвляем сообщение
             override fun onVerificationCompleted(phone: PhoneAuthCredential) { //если код появился
+                Log.d("AAA verification", phone.smsCode.toString())
                 var code: String? = phone.smsCode
                 if (code != null) {
                     otpInput.setText(code) //передаем код(текстовое поле, сюда приходит код)
                 }
             }
-
+            
             override fun onVerificationFailed(p0: FirebaseException) { //если код не появился
                 Toast.makeText(this@SignUpActivity, p0.message, Toast.LENGTH_SHORT).show()
+                Log.d("AAA verification", p0.message.toString())
                 Log.e("err", p0.message.toString())
             }
-
-                        override fun onCodeSent(s: String, p1: PhoneAuthProvider.ForceResendingToken) { //отвечает за отправку смс
+            
+            override fun onCodeSent(
+                s: String,
+                p1: PhoneAuthProvider.ForceResendingToken
+            ) { //отвечает за отправку смс
+                Log.d("AAA verification", s.toString())
                 super.onCodeSent(s, p1)
                 verificationId = s
             }
-
+            
         }
-
+        
         val options = PhoneAuthOptions.newBuilder(mAuth)
             .setPhoneNumber(phoneInput.text.toString())
             .setTimeout(60L, TimeUnit.SECONDS)
             .setActivity(this)
             .setCallbacks(mCallBack) //отвечает за отправку кода, который написан выше
             .build()
-
+        
         PhoneAuthProvider.verifyPhoneNumber(options)
-
-
-
+        Log.d("AAA verification", options.toString())
+    
+    
+    
         closeBtn.setOnClickListener {//пишем, что будет просиходить после нажатия
             builder.dismiss() //закрытие диалогового окна
         }
@@ -138,18 +146,29 @@ class SignUpActivity : AppCompatActivity() {
             } else {
                 verifyCode(code)
             }
-
+            
         }
-
+        
         builder.setCanceledOnTouchOutside(false) //если мимо окна нажали, то оно не закроется
         builder.show()
     }
-
+    
     private fun verifyCode(code: String) { //создаем ф-ию для вертификации пользователя(сравниваем код, если все нормальното выполниться verificationId, code
-        var credential: PhoneAuthCredential = PhoneAuthProvider.getCredential(verificationId, code) //credential-токен(нужен для firebase)
+        Log.d(
+            "AAA verification",
+            verificationId
+        )// даем ф-ию для вертификации пользователя(сравниваем код, если все нормальното выполниться verificationId, code
+        Log.d(
+            "AAA code",
+            code
+        )// даем ф-ию для вертификации пользователя(сравниваем код, если все нормальното выполниться verificationId, code
+        var credential: PhoneAuthCredential = PhoneAuthProvider.getCredential(
+            verificationId,
+            code
+        ) //credential-токен(нужен для firebase)
         signInWithCreditional(credential)
     }
-
+    
     private fun signInWithCreditional(credential: PhoneAuthCredential) {
         var firebaseAuth = FirebaseAuth.getInstance()
         firebaseAuth.signInWithCredential(credential)
@@ -159,11 +178,14 @@ class SignUpActivity : AppCompatActivity() {
                     val storageRef = FirebaseStorage.getInstance().getReference("profile") //папка
                         .child(FirebaseAuth.getInstance().currentUser!!.uid) //ребенок(подпапка)
                         .child("profile.jpg")
-
+                    
                     storageRef.putFile(uriImg!!) //profile.jpg закидываем нашу картинку сюда
                         .addOnSuccessListener {
+                            
+                            
                             storageRef.downloadUrl
                                 .addOnSuccessListener {
+                                    Log.d("AAA photo", it.toString())
                                     storeData(it)
                                 }
                                 .addOnFailureListener {
@@ -183,7 +205,7 @@ class SignUpActivity : AppCompatActivity() {
                 //Toast.makeText(this, "Лохъ", Toast.LENGTH_SHORT).show()
             }
     }
-
+    
     private fun storeData(uri: Uri?) {//экземпляр класса пользователя
         val newUser = User( //новый тип класса пользователя
             FirebaseAuth.getInstance().currentUser!!.uid,
@@ -192,7 +214,7 @@ class SignUpActivity : AppCompatActivity() {
             dobOfUser,
             uri.toString()
         )
-
+        
         FirebaseDatabase.getInstance().getReference("users") //табличка, где лежат все пользователи
             .child(FirebaseAuth.getInstance().currentUser!!.phoneNumber!!)
             .setValue(newUser).addOnCompleteListener { //добавление нового пользователя в БД
@@ -210,11 +232,10 @@ class SignUpActivity : AppCompatActivity() {
                 Toast.makeText(this, "${it.message}", Toast.LENGTH_SHORT).show()
                 Log.e("err3", it.message.toString())
             }
-
+        
     }
-
-
-
+    
+    
     private fun init() {
         backBtn = findViewById(R.id.back_button)
         imageUser = findViewById(R.id.image_user)
@@ -224,20 +245,14 @@ class SignUpActivity : AppCompatActivity() {
         signUpBtn = findViewById(R.id.sign_up_btn)
         mAuth = FirebaseAuth.getInstance()
         builder = AlertDialog.Builder(this).create()
-
-
-        dobInput.init(2000, 0,1, object : DatePicker.OnDateChangedListener{
-            override fun onDateChanged(
-                view: DatePicker?,
-                year: Int,
-                monthOfYear: Int,
-                dayOfMonth: Int
-            ) {
-                dobOfUser = "${view?.dayOfMonth}.${view!!.month + 1}.${view.year}"
-            }
-
-        })
-
+        
+        
+        dobInput.init(
+            2000, 0, 1
+        ) { view, year, monthOfYear, dayOfMonth ->
+            dobOfUser = "${view?.dayOfMonth}.${view!!.month + 1}.${view.year}"
+        }
+        
     }
-
+    
 }

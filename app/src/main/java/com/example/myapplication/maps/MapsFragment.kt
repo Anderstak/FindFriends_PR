@@ -17,6 +17,7 @@ import android.graphics.Rect
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -369,59 +370,63 @@ class MapsFragment : Fragment() {
                         for (postSnapshot in snapshot.children) {
                             try {
                                 postSnapshot.getValue<User>()?.let { users.add(it) }
-                            } catch (_: Exception) {
+                            } catch (e: Exception) {
+                                Log.d("AAA error", e.message.toString())
                             }
                         }
-
-                        /**
-                         * Все пользователи, которые должны быть на карте
-                         */
-                        val usersOnMapList = users.filter {
-                            var contains = false
-                            friendsMapObjectCollection.forEach { friendList ->
-                                if (friendList.user.uuid == it.uuid) {
-                                    contains = true
-                                    return@forEach
-                                }
-                            }
-                            contains
-                        }
-
-                        /**
-                         * Пользователи, которых необхоимо добавить
-                         */
-                        val addedUsers = users.filter { user ->
-                            var contains = false
-                            usersOnMapList.forEach { userOnMap ->
-                                if (userOnMap.uuid == user.uuid) {
-                                    contains = true
-                                    return@forEach
-                                }
-                            }
-                            ! contains
-                        }
-
-                        /**
-                         * Пользователи, которых необходимо удалить с карты
-                         */
-                        val removedUsers = friendsMapObjectCollection.filter {
-                            var contains = false
-                            usersOnMapList.forEach { userOnMap ->
-                                if (userOnMap.uuid == it.user.uuid) {
-                                    contains = true
-                                    return@forEach
-                                }
-                            }
-                            ! contains
-                        }
-
-                        //Удаление пользоватлей с карты
-                        removedUsers.forEach {
-                            mapObjects.remove(it.placemarkMapObject)
-                            friendsMapObjectCollection.remove(it)
-                        }
+                        Log.d("AAA users", users.toString())
+//
+//                        /**
+//                         * Все пользователи, которые должны быть на карте
+//                         */
+//                        val usersOnMapList = users.filter {
+//                            var contains = false
+//                            friendsMapObjectCollection.forEach { friendList ->
+//                                if (friendList.user.uuid == it.uuid) {
+//                                    contains = true
+//                                    return@forEach
+//                                }
+//                            }
+//                            contains
+//                        }
+//                        Log.d("AAA usersOnMapList", usersOnMapList.toString())
+//
+//
+//                        /**
+//                         * Пользователи, которых необхоимо добавить
+//                         */
+//                        val addedUsers = users.filter { user ->
+//                            var contains = false
+//                            usersOnMapList.forEach { userOnMap ->
+//                                if (userOnMap.uuid == user.uuid) {
+//                                    contains = true
+//                                    return@forEach
+//                                }
+//                            }
+//                            ! contains
+//                        }
+//
+//                        /**
+//                         * Пользователи, которых необходимо удалить с карты
+//                         */
+//                        val removedUsers = friendsMapObjectCollection.filter {
+//                            var contains = false
+//                            usersOnMapList.forEach { userOnMap ->
+//                                if (userOnMap.uuid == it.user.uuid) {
+//                                    contains = true
+//                                    return@forEach
+//                                }
+//                            }
+//                            ! contains
+//                        }
+//
+//                        //Удаление пользоватлей с карты
+//                        removedUsers.forEach {
+//                            mapObjects.remove(it.placemarkMapObject)
+//                            friendsMapObjectCollection.remove(it)
+//                        }
                         //Добавление пользоватлей на карту
-                        addedUsers.forEach { user ->
+                        users.forEach { user ->
                             CoroutineScope(Dispatchers.IO).launch {
                                 getBitmapFromURL(user.imageUser)?.let { bitmap ->
                                     withContext(Dispatchers.Main) {

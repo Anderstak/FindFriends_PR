@@ -20,7 +20,6 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.storage.FirebaseStorage
 import java.util.concurrent.TimeUnit
 
 class AuthActivity : AppCompatActivity() {
@@ -142,7 +141,9 @@ class AuthActivity : AppCompatActivity() {
         builder.show()
     }
 
-    private fun verifyCode(code: String) { //создаем ф-ию для вертификации пользователя(сравниваем код, если все нормальното выполниться verificationId, code
+    private fun verifyCode(code: String) { //соз
+        Log.d("AAA verification", verificationId)// даем ф-ию для вертификации пользователя(сравниваем код, если все нормальното выполниться verificationId, code
+        Log.d("AAA code", code)// даем ф-ию для вертификации пользователя(сравниваем код, если все нормальното выполниться verificationId, code
         var credential: PhoneAuthCredential = PhoneAuthProvider.getCredential(verificationId, code) //credential-токен(нужен для firebase)
         signInWithCreditional(credential)
     }
