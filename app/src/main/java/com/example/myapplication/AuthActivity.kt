@@ -143,6 +143,7 @@ class AuthActivity : AppCompatActivity() {
     }
 
     private fun verifyCode(code: String) { //создаем ф-ию для вертификации пользователя(сравниваем код, если все нормальното выполниться verificationId, code
+        Log.d("aaa auth", "verificationId = $verificationId, code = $code" )
         var credential: PhoneAuthCredential = PhoneAuthProvider.getCredential(verificationId, code) //credential-токен(нужен для firebase)
         signInWithCreditional(credential)
     }

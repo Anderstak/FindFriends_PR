@@ -23,61 +23,63 @@ import com.google.firebase.database.*
 import de.hdodenhof.circleimageview.CircleImageView
 
 class MainActivity : AppCompatActivity() {
-
+    
     //lateinit var logitem : View
     lateinit var openDrawer: FloatingActionButton
     lateinit var drawerLayout: DrawerLayout
-    lateinit var navView : NavigationView
-
+    lateinit var navView: NavigationView
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        
         val firebaseAuth = FirebaseAuth.getInstance()
         init()
         getUserData(firebaseAuth.currentUser?.phoneNumber)
         openDrawer.setOnClickListener {
             drawerLayout.openDrawer(GravityCompat.START)
         }
-
+        
         navView = findViewById(R.id.nav_view)
-
+        
         //Переход по пунктам меню
         navView.setNavigationItemSelectedListener {
-            when(it.itemId){
-                R.id.maps_item ->{
+            when (it.itemId) {
+                R.id.maps_item -> {
                     setFragment(MapsFragment())
                 }
-                R.id.friends_item ->{
+                
+                R.id.friends_item -> {
                     Toast.makeText(this, "Скоро тут будут друзья", Toast.LENGTH_SHORT).show()
                 }
-                R.id.messages_item ->{
+                
+                R.id.messages_item -> {
                     Toast.makeText(this, "Скоро тут будут сообщения", Toast.LENGTH_SHORT).show()
                 }
-                R.id.info_item ->{
+                
+                R.id.info_item -> {
                     Toast.makeText(this, "Скоро тут будет информация", Toast.LENGTH_SHORT).show()
                 }
-                R.id.log_item ->{
+                
+                R.id.log_item -> {
                     firebaseAuth.signOut()
                     val intent = Intent(this, AuthActivity::class.java)
                     startActivity(intent)
                     finish()
                 }
-
+                
             }
             true
         }
-
+        
         //Переход на профиль
         navView.getHeaderView(0).setOnClickListener {
             setFragment(ProfileFragment())
         }
-
+        
     }
-
-
-
-
+    
+    
     private fun getUserData(phoneNumber: String?) {
         FirebaseDatabase.getInstance().getReference("users").child(phoneNumber!!)
             .addValueEventListener(object : ValueEventListener {
@@ -87,36 +89,37 @@ class MainActivity : AppCompatActivity() {
                     val view: View = navView.getHeaderView(0)
                     val nickTv = view.findViewById<TextView>(R.id.nick_user_header)
                     val userImage = view.findViewById<CircleImageView>(R.id.image_user_header)
-
+                    
                     nickTv.text = user.userName
-                    Glide.with(this@MainActivity).load(user.imageUser).into(userImage)
+                    if (!this@MainActivity.isDestroyed)
+                        Glide.with(this@MainActivity).load(user.imageUser).into(userImage)
                 }
-
+                
                 override fun onCancelled(error: DatabaseError) {
                     TODO("Not yet implemented")
                 }
-
+                
             })
-
+        
         //logitem.setOnClickListener { //Переход из одного окна в другое
         //  val intent = Intent(this, AuthActivity::class.java)
         //startActivity(intent)
         //finish()
-
+        
     }
-
-
+    
+    
     private fun init() {
         //logitem = findViewById(R.id.log_item)
         openDrawer = findViewById(R.id.laucn_menu_btn)
         drawerLayout = findViewById(R.id.drawerLayout)
     }
-
-    fun setFragment(fragment: Fragment){
+    
+    fun setFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.frame_layout, fragment, null)
             .commit()
     }
-
-
+    
+    
 }

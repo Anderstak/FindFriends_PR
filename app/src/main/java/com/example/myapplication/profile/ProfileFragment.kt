@@ -57,7 +57,7 @@ class ProfileFragment : Fragment() {
                     nickname.setText(user.userName)
                     phone.text = user.phoneNumber
                     dob.text = user.dob
-                    Glide.with(context!!).load(user.imageUser).into(imageUser)
+                    context?.let { Glide.with(it).load(user.imageUser).into(imageUser) }
                 }
 
                 override fun onCancelled(error: DatabaseError) {

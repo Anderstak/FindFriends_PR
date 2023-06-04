@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit
 
 class SignUpActivity : AppCompatActivity() {
 
-//все перменные, которые отображаются на пользовательском интерфейсе
+    //все перменные, которые отображаются на пользовательском интерфейсе
     lateinit var backBtn: ImageButton
     lateinit var imageUser: CircleImageView
     lateinit var dobInput: DatePicker
@@ -44,7 +44,7 @@ class SignUpActivity : AppCompatActivity() {
     private var uriImg: Uri? = null //путь к картинке
 
     private val selectImage = registerForActivityResult(ActivityResultContracts.GetContent()) {
-        //отвечает за выбор картинки из папки выбор картинки
+        //отвечает за выбор картинки из папки картинки
 
         uriImg = it
         imageUser.setImageURI(uriImg) //устанавливаем в юзера нашу картинку(передаем)
@@ -73,15 +73,14 @@ class SignUpActivity : AppCompatActivity() {
         }
     }
 
-
     private fun validData() { //проверяем корректность данных(проверка полей)
         if (TextUtils.isEmpty(nicknameInput.text.toString())) {
             nicknameInput.setError("Enter nickname")
-        }else if (!Patterns.PHONE.matcher(phoneInput.text.toString()).matches()) {
+        } else if (!Patterns.PHONE.matcher(phoneInput.text.toString()).matches()) {
             phoneInput.setError("Enter phone number")
-        }else if(uriImg == null) {
+        } else if (uriImg == null) {
             Toast.makeText(this, "Choose profile image", Toast.LENGTH_SHORT).show()
-        }else {
+        } else {
             showOTPDialog()//отвечает за показ диалогового окна
         }
     }
@@ -96,11 +95,12 @@ class SignUpActivity : AppCompatActivity() {
         builder.setView(view)
 
 
-        val mCallBack = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() { //отвечает за отправку смс
+        val mCallBack = object :
+            PhoneAuthProvider.OnVerificationStateChangedCallbacks() { //отвечает за отправку смс
             // при вызове нашего диалога(до его создание) отпрвляем сообщение
             override fun onVerificationCompleted(phone: PhoneAuthCredential) { //если код появился
                 var code: String? = phone.smsCode
-                if (code != null) {
+                if (code != null) {//проверяем, что не null
                     otpInput.setText(code) //передаем код(текстовое поле, сюда приходит код)
                 }
             }
@@ -110,7 +110,10 @@ class SignUpActivity : AppCompatActivity() {
                 Log.e("err", p0.message.toString())
             }
 
-                        override fun onCodeSent(s: String, p1: PhoneAuthProvider.ForceResendingToken) { //отвечает за отправку смс
+            override fun onCodeSent(
+                s: String,
+                p1: PhoneAuthProvider.ForceResendingToken
+            ) { //отвечает за отправку смс
                 super.onCodeSent(s, p1)
                 verificationId = s
             }
@@ -145,8 +148,13 @@ class SignUpActivity : AppCompatActivity() {
         builder.show()
     }
 
+
+
     private fun verifyCode(code: String) { //создаем ф-ию для вертификации пользователя(сравниваем код, если все нормальното выполниться verificationId, code
-        var credential: PhoneAuthCredential = PhoneAuthProvider.getCredential(verificationId, code) //credential-токен(нужен для firebase)
+        var credential: PhoneAuthCredential = PhoneAuthProvider.getCredential(
+            verificationId,
+            code
+        ) //credential-токен(нужен для firebase)
         signInWithCreditional(credential)
     }
 
@@ -184,17 +192,18 @@ class SignUpActivity : AppCompatActivity() {
             }
     }
 
+    //отвечает за добавление нового пользлователя в БД
     private fun storeData(uri: Uri?) {//экземпляр класса пользователя
         val newUser = User( //новый тип класса пользователя
-            FirebaseAuth.getInstance().currentUser!!.uid,
+            FirebaseAuth.getInstance().currentUser!!.uid, //текущий номер телефона
             FirebaseAuth.getInstance().currentUser!!.phoneNumber!!,
             nicknameInput.text.toString(),
             dobOfUser,
-            uri.toString()
+            uri.toString()//ссылка на картинку
         )
 
         FirebaseDatabase.getInstance().getReference("users") //табличка, где лежат все пользователи
-            .child(FirebaseAuth.getInstance().currentUser!!.phoneNumber!!)
+            .child(FirebaseAuth.getInstance().currentUser!!.phoneNumber!!) //создаем экземпляр
             .setValue(newUser).addOnCompleteListener { //добавление нового пользователя в БД
                 builder.dismiss()
                 if (it.isSuccessful) {
@@ -214,7 +223,6 @@ class SignUpActivity : AppCompatActivity() {
     }
 
 
-
     private fun init() {
         backBtn = findViewById(R.id.back_button)
         imageUser = findViewById(R.id.image_user)
@@ -222,11 +230,11 @@ class SignUpActivity : AppCompatActivity() {
         nicknameInput = findViewById(R.id.nickname_input)
         phoneInput = findViewById(R.id.phone_input)
         signUpBtn = findViewById(R.id.sign_up_btn)
-        mAuth = FirebaseAuth.getInstance()
+        mAuth = FirebaseAuth.getInstance() //отвечает за Firebase аунтецикацию
         builder = AlertDialog.Builder(this).create()
 
 
-        dobInput.init(2000, 0,1, object : DatePicker.OnDateChangedListener{
+        dobInput.init(2000, 0, 1, object : DatePicker.OnDateChangedListener {
             override fun onDateChanged(
                 view: DatePicker?,
                 year: Int,
